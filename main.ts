@@ -566,6 +566,70 @@ namespace SuperBitV2_Digital {
 		}
     }
 
+    //% blockId="dht11valueV2" block="dht11_V2 %dht11type| at pin %value_DNum"
+    //% weight=100
+    //% blockGap=20
+    //% name.fieldEditor="gridpicker" name.fieldOptions.columns=5 
+    export function dht11valueV2(dht11type: DHT11Type, value_DNum: mwDigitalNum): number {
+        let dht11pin;
+		if(value_DNum == 1)	{ dht11pin = DigitalPin.P4; }
+		else if(value_DNum == 2)	{ dht11pin = DigitalPin.P1; }
+		else if(value_DNum == 3)	{ dht11pin = DigitalPin.P0; }
+		else if(value_DNum == 4)	{ dht11pin = DigitalPin.P10; }
+		else if(value_DNum == 5)	{ dht11pin = DigitalPin.P7; }
+		else if(value_DNum == 6)	{ dht11pin = DigitalPin.P5; }
+
+
+		pins.digitalWritePin(dht11pin, 1)
+		control.waitMicros(30) //拉高30us
+
+		pins.digitalWritePin(dht11pin, 0)
+		basic.pause(20)
+        
+        pins.digitalWritePin(dht11pin, 1)
+		control.waitMicros(30) //拉高30us
+
+		pins.setPull(dht11pin, PinPullMode.PullUp);
+
+        switch (dht11type) {
+			case 0:
+				let dhtvalue1 = 0;
+				let dhtcounter1 = 0;
+				let dhtcounter1d = 0;
+
+                //等待应答完成
+				while (pins.digitalReadPin(dht11pin) == 1);
+				while (pins.digitalReadPin(dht11pin) == 0);
+				while (pins.digitalReadPin(dht11pin) == 1)
+                
+                //开始传输
+				for (let i = 0; i <= 32 - 1; i++) {
+                    while (pins.digitalReadPin(dht11pin) == 1);
+                    while (pins.digitalReadPin(dht11pin) == 0);
+                    control.waitMicros(30)
+                    if (pins.digitalReadPin(dht11pin) == 1)
+                    dhtvalue1 = dhtvalue1 + (1 << (31 - i));
+                }
+				// 	dhtcounter1d = 0
+				// 	while (pins.digitalReadPin(dht11pin) == 0) {
+				// 		dhtcounter1d += 1;
+				// 	}
+				// 	dhtcounter1 = 0
+				// 	while (pins.digitalReadPin(dht11pin) == 1) {
+				// 		dhtcounter1 += 1;
+				// 	}
+				// 	if (i > 15) {
+				// 		if (dhtcounter1 > dhtcounter1d) {
+				// 			dhtvalue1 = dhtvalue1 + (1 << (31 - i));
+				// 		}
+				// 	}
+				// }
+				return ((dhtvalue1 & 0x0000ff00) >> 8);
+            }
+
+        return 0;
+    }
+
 
     //% blockId=SuperBitV2_Digital_Ultrasonic block="Ultrasonic|pin %value_DNum"
     //% weight=97
